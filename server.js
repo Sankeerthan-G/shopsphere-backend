@@ -1,77 +1,78 @@
+require("dotenv").config();
+
 const express = require("express");
+
+const pool = require("./config/db");
+
+const userRoutes = require("./routes/userRoutes");
+const productRoutes = require("./routes/productRoutes");
+const orderRoutes = require("./routes/orderRoutes");
+
 
 const app = express();
 
 const PORT = 3000;
 
-// Home Route
+
+// Middleware
+
+app.use(express.json());
+
+
+// Routes
+
+app.use("/users", userRoutes);
+
+app.use("/products", productRoutes);
+
+app.use("/orders", orderRoutes);
+
+
+// Home
+
 app.get("/", (req, res) => {
+
     res.json({
-        message: "Welcome to ShopSphere API"
+        message: "Welcome to ShopSphere API",
+        status: "running"
     });
-});
-
-// Users Route
-app.get("/users", (req, res) => {
-    const users = [
-        {
-            id: 1,
-            name: "Rahul",
-            email: "rahul@example.com"
-        },
-        {
-            id: 2,
-            name: "Priya",
-            email: "priya@example.com"
-        }
-    ];
-
-    res.json(users);
-});
-
-// Products Route
-app.get("/products", (req, res) => {
-
-    const products = [
-        {
-            id: 101,
-            name: "Laptop",
-            price: 75000
-        },
-        {
-            id: 102,
-            name: "Keyboard",
-            price: 2500
-        }
-    ];
-
-    res.json(products);
 
 });
 
-// Orders Route
-app.get("/orders", (req, res) => {
 
-    const orders = [
-        {
-            orderId: 1001,
-            userId: 1,
-            productId: 101,
-            quantity: 1
-        },
-        {
-            orderId: 1002,
-            userId: 2,
-            productId: 102,
-            quantity: 2
-        }
-    ];
+// Health Check
 
-    res.json(orders);
+app.get("/health", async (req, res) => {
+
+    try {
+
+        await pool.query("SELECT 1");
+
+        res.status(200).json({
+            status: "UP",
+            database: "connected"
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        res.status(500).json({
+            status: "DOWN",
+            database: "disconnected"
+        });
+
+    }
 
 });
+
 
 // Start Server
+
 app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+
+    console.log(
+        `ShopSphere backend is running on http://localhost:${PORT}`
+    );
+
 });
