@@ -1,0 +1,33 @@
+services:
+
+  api:
+    build: .
+    container_name: shopsphere-api
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: postgres
+    depends_on:
+      - postgres
+    networks:
+      - shopsphere-network
+
+  postgres:
+    image: postgres:17
+    container_name: shopsphere-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: shopsphere
+    volumes:
+      - shopsphere-postgres-data:/var/lib/postgresql/data
+    networks:
+      - shopsphere-network
+
+volumes:
+  shopsphere-postgres-data:
+
+networks:
+  shopsphere-network:
