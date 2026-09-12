@@ -2,15 +2,17 @@ services:
 
   api:
     build: .
-    container_name: shopsphere-api
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
     env_file:
       - .env
     environment:
       POSTGRES_HOST: postgres
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
     depends_on:
       - postgres
+      - redis
     networks:
       - shopsphere-network
 
@@ -25,7 +27,22 @@ services:
       - shopsphere-postgres-data:/var/lib/postgresql/data
     networks:
       - shopsphere-network
-
+  redis:
+    image: redis:7-alpine
+    container_name: shopsphere-redis
+    networks:
+      - shopsphere-network
+  nginx:
+    image: nginx:alpine
+    container_name: shopsphere-nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - api
+    networks:
+      - shopsphere-network
 volumes:
   shopsphere-postgres-data:
 

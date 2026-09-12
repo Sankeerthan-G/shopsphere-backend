@@ -1,24 +1,51 @@
 const pool = require("../config/db");
-
+const { redisClient } = require("../config/redis");
 
 // GET /products
 const getProducts = async (req, res) => {
     try {
+
+        // 1. Check Redis cache
+        const cachedProducts = await redisClient.get("products");
+
+        if (cachedProducts) {
+
+            console.log("Products served from Redis");
+
+            return res.json(JSON.parse(cachedProducts));
+        }
+
+
+        // 2. Cache miss → get data from PostgreSQL
+        console.log("Products served from PostgreSQL");
+
         const result = await pool.query(
             "SELECT * FROM products ORDER BY id"
         );
 
+
+        // 3. Store PostgreSQL result in Redis
+        await redisClient.set(
+            "products",
+            JSON.stringify(result.rows),
+            {
+                EX: 60
+            }
+        );
+
+
+        // 4. Return response
         res.json(result.rows);
 
     } catch (error) {
-        console.error(error);
+
+        console.error("Failed to fetch products:", error);
 
         res.status(500).json({
             error: "Failed to fetch products"
         });
     }
 };
-
 
 // POST /products
 const createProduct = async (req, res) => {
