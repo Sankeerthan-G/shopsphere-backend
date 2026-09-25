@@ -79,7 +79,6 @@ app.get("/health", async (req, res) => {
 
 });
 
-
 // ===============================
 // Start Server
 // ===============================
@@ -113,4 +112,10 @@ const startServer = async () => {
 };
 
 
-startServer();
+// Start server only when this file is run directly
+if (require.main === module) {
+    startServer();
+}
+
+
+module.exports = app;
