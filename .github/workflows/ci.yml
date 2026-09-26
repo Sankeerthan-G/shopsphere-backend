@@ -26,7 +26,7 @@ jobs:
         run: npm test
 
       - name: Build Docker image
-        run: docker build -t shopsphere-backend:${{ github.sha }} .
+        run: docker build -t sankeerthan004/shopsphere-backend:${{ github.sha }} .
 
       - name: Login to docker hub
         uses: docker/login-action@v3
@@ -34,5 +34,5 @@ jobs:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: push docker image
+      - name: Push docker image
         run: docker push sankeerthan004/shopsphere-backend:${{ github.sha }}
